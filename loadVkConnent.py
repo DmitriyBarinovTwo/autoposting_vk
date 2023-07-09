@@ -1,7 +1,7 @@
 import requests
 
 
-class vk_mananger(object):
+class vk_manager(object):
 
         def __init__(self, ConfigSystem: dict):
                 ConfigVK = ConfigSystem['VkApiParam']
