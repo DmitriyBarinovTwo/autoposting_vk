@@ -1,5 +1,5 @@
 import pandas as pd
-from mananger_DB import manager_DB
+from manager_DB import manager_DB
 from sql_query import sql_query_manager as SqlMan
 from logi import LogManagerPost as Log
 from loadVkConnent import vk_manager as VkMan
