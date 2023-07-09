@@ -1,0 +1,7 @@
+{
+    "line_post": {"TableName": "line_post", "ColumnsName" : ["id_day", "id_albom", "count_photo","union_photos","start_date","finish_date","id_group"]},
+    "total_photos": {"TableName": "total_photos", "ColumnsName" : ["id_albom", "total_photo", "date","id_group","union_photos"]},
+    "comment_photo": {"TableName": "comment_photo", "ColumnsName" : ["id_albom", "id_photo", "comment","id_group","union_photos"]},
+    "history_post": {"TableName": "history_post", "ColumnsName" : ["id_albom","id_pic","comment","line","time_push","id_group","union_photos"]},
+    "out_of_line_post": {"TableName": "out_of_line_post", "ColumnsName" : ["id_albom","id_photo","comment","data","time","status","id_group","union_photos"]}
+  }
