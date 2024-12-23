@@ -11,7 +11,8 @@ class LogManagerPost(object):
 
 
     def __init__(self, ConfigSystem):
-        super().__init__(ConfigSystem)
+        super().__init__()
+        self.IdGroupQuery = ConfigSystem['VkApiParam'].get('GROUP_ID')
 
     def TimeCorrect(self):
         logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : "Прошло достаточно времени после последний публикации"})
@@ -43,3 +44,15 @@ class LogManagerPost(object):
     
     def MessageErrorShare(self,ex):
         logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : f"Ошибка. {ex}"}, exc_info=True)
+
+    def VkAnswer(self,answer):
+            logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : f"vk load post: {answer.json()['response']}"})
+
+    def VkError(self,answer):
+            logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : f"Ошибка. {answer.json()}"})
+    
+    def AttemptError(self, attempt, ex):
+        logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : f"Ошибка загрузки ВК. Попытка {attempt}, подробнее: {ex}"}, exc_info=True)
+
+    def RollbackRowBD(self,number):
+        logger.info({"ID_GROUP" : self.IdGroupQuery, "message" : f"Откат сообщения из базы после ошибки c id_push: {number}"})

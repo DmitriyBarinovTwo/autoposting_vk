@@ -3,6 +3,7 @@ from manager_DB import manager_DB
 from sql_query import sql_query_manager as SqlMan
 from logi import LogManagerPost as Log
 from loadVkConnent import vk_manager as VkMan
+from mail_sender import mail_send as SendMail
 from GetPic import GetPicture as GP
 from datetime import timedelta, datetime, timezone
 from random import randint
@@ -12,12 +13,16 @@ from pathlib import Path
 import time
 import logging
 import os.path
+import traceback
 
 logger = logging.getLogger("LogManagerPost")
 logger.info("from utils.py")
 
-class ManagerPost(manager_DB,GP,SqlMan,VkMan,Log):
+class ManagerPost(manager_DB,GP,SqlMan,VkMan,SendMail,Log):
     "класс для управленеия постановкой постов"
+    
+    def __init__(self, ConfigSystem: dict, ConfigTable: dict):
+        super().__init__(ConfigSystem, ConfigTable)
     
     def CheckTime (self):
         """определяем сколько разница по времени должна быть
@@ -26,8 +31,8 @@ class ManagerPost(manager_DB,GP,SqlMan,VkMan,Log):
         
         CountPost = str(pd.read_sql(SqlMan.CountPostDay(self), self.conn)['count'][0])
         TimeIntervalDict = {'2': 13, 
-                    '3': 5,
-                    '4': 4,
+                    '3': 4,
+                    '4': 6,
                     }
         
 
@@ -147,7 +152,7 @@ class ManagerPost(manager_DB,GP,SqlMan,VkMan,Log):
             Comment = ManagerPost.GetCommment(self,InfoPost, BoxNewPic[0])
 
         # определяем время
-        minute = randint(5, 59)
+        minute = randint(1, 59)
         Date = datetime(today.year, today.month, today.day, today.hour, minute)
 
         BoxWithPath = []
@@ -183,10 +188,43 @@ class ManagerPost(manager_DB,GP,SqlMan,VkMan,Log):
 
                 for i in range(len(BoxNewPic)):
                     BoxWithPath.append(DirAlbom + str('/') + str(BoxNewPic[i]) + str('.jpg'))
+                    
         Log.InfoPostLog(self,InfoPost['id_albom'][0],BoxNewPic,Comment,Date)
-        manager_DB.CoonClose(self)
-        unixtime = time.mktime(Date.timetuple())
-        VkMan.LoadVkСontent(self,BoxWithPath,unixtime,Comment)
+        unixtime = int(time.mktime(Date.timetuple()))
+
+
+        # повторяем публикацию в ВКонтакте в течении 3 попыток, если произойдет ошибка
+        attempts = 0
+        while attempts < 3:
+            try:
+                answer = VkMan.LoadVkСontent(self,BoxWithPath,unixtime,Comment)
+                break 
+            except Exception as ex:
+                Log.AttemptError(self,attempts, ex)
+                error_message = f"\nТрассировка:\n{traceback.format_exc()}"
+                attempts += 1
+            finally:
+                # откат в базе
+                if attempts == 3:
+                    IdPush = pd.read_sql(SqlMan.LastIdPush(self), self.conn)['max'][0]
+                    manager_DB.DeleteRow(self,SqlMan.DeleteLastRow(self))
+                    manager_DB.CoonClose(self)
+                    Log.RollbackRowBD(self,IdPush)
+                    SendMail.ErrorMessageMail(self,f"""Ошибка загрузки ВК: \n {error_message } """)
+                    sys.exit()
+        
         Log.PostUploudVK(self)
+        
+        # логируем 200 ответ от ВКонтакте с error сообщением   
+        try: 
+            Log.VkAnswer(self, answer)
+        except KeyError: 
+            Log.VkError(self, answer)
+            IdPush = pd.read_sql(SqlMan.LastIdPush(self), self.conn)['max'][0]
+            manager_DB.DeleteRow(self,SqlMan.DeleteLastRow(self))
+            Log.RollbackRowBD(self,IdPush)
+            SendMail.ErrorMessageMail(self,answer.json())
+
+        manager_DB.CoonClose(self)
 
         return 

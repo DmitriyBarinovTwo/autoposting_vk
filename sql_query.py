@@ -91,18 +91,18 @@ class sql_query_manager(object):
             )
 
            
-            select DISTINCT id_am as id_albom,
+            SELECT id_am as id_albom,
             id_day,
             total_photo,
             union_photos,
-            count_photo
-            from (SELECT *,
+            count_photo,
             ROW_NUMBER() OVER(PARTITION BY id_albom ORDER BY date DESC) as actual_row
             from {self.SchemaDB}.total_photos
 			left join tb2 ON  {self.SchemaDB}.total_photos.id_albom = tb2.id_am
-            WHERE id_group = {self.IdGroupQuery} and total_photos.union_photos = tb2.up) as t
-         	Limit = 1 
+            WHERE id_group = {self.IdGroupQuery} and total_photos.union_photos = tb2.up
+         	Limit 1 
             """
+
             return TextQuery
     
     def GetIdAlbomNew(self):
@@ -141,6 +141,7 @@ class sql_query_manager(object):
             LEFT JOIN l on l.id_albom = hp.id_albom
             where time_push > (select * from times)
             """
+           
             return TextQuery
 
     def GetIdCom(self, InfoPost, photo, check: bool):
@@ -171,4 +172,15 @@ class sql_query_manager(object):
             and union_photos = {InfoPost['union_photos'][0]}
             GROUP BY comment"""
 
+            return TextQuery
+    
+    def LastIdPush(self):
+            TextQuery = f"""SELECT max(id_push) from {self.SchemaDB}.history_post where id_group ={self.IdGroupQuery}
+            """
+            return TextQuery
+
+    def DeleteLastRow(self):
+            TextQuery = f"""DELETE FROM {self.SchemaDB}.history_post
+            WHERE id_push = (SELECT max(id_push) from {self.SchemaDB}.history_post where id_group ={self.IdGroupQuery})
+            """
             return TextQuery

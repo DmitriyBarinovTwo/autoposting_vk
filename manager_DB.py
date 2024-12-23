@@ -54,8 +54,13 @@ class manager_DB(object):
        
         self.cursor.execute(sql_query)
         self.conn.commit()
-    
         return
+    
+    def DeleteRow(self, query_text: str):
+        self.cursor.execute(query_text)
+        self.conn.commit()
+        return 
+    
     
     def CoonClose(self):
         return self.conn.close() 

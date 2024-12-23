@@ -4,6 +4,7 @@ import requests
 class vk_manager(object):
 
         def __init__(self, ConfigSystem: dict):
+                super().__init__(ConfigSystem)
                 ConfigVK = ConfigSystem['VkApiParam']
                 self.ACCESS_TOKEN = ConfigVK.get('ACCESS_TOKEN')
                 self.GROUP_ID = ConfigVK.get('GROUP_ID')
@@ -17,8 +18,12 @@ class vk_manager(object):
                         'v': self.VERSION})
                 upload_url = response.json()['response']['upload_url']
 
+
+                # Задаём идентификатор группы, токен доступа, картинку и её описание
+
                 BoxPhotoLink = []
                 
+
                 for i in range(len(PhotoPath)):
 
                 # Формируем данные параметров для сохранения картинки на сервере
@@ -39,6 +44,8 @@ class vk_manager(object):
                 PhotoLink = ",".join(BoxPhotoLink)
 
                 # # Формируем параметры для размещения картинки в группе и публикуем её
+
+
                 if Comment != 'NULL':
                         params = {'access_token': self.ACCESS_TOKEN,
                         'owner_id': -self.GROUP_ID,
@@ -56,4 +63,5 @@ class vk_manager(object):
                         'v': self.VERSION}
 
                 
-                requests.get('https://api.vk.com/method/wall.post', params)
+                response = requests.get('https://api.vk.com/method/wall.post', params)
+                return response

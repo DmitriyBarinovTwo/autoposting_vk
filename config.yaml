@@ -1,22 +1,30 @@
 ---
   PostgresParam:
-    DBNAME: 
-    USER: 
-    PASSWORD:  
-    HOST: 
-    PORT: 
-    SCHEMA: 
+    DBNAME:
+    USER:
+    PASSWORD:
+    HOST:
+    PORT:
+    SCHEMA:
   VkApiParam:
-    ACCESS_TOKEN: 
-    VERSION:  
-    GROUP_ID: 
+    ACCESS_TOKEN:
+    VERSION:
+    GROUP_ID:
   GrafanaLoki:
-    URL: 
-    TAG:  
-    USER: 
-    PASSWORD: 
-    VERSION: 
+    URL:
+    TAG:
+    USER:
+    PASSWORD:
+    VERSION:
+  MailSender:
+    SERVER:
+    PORT:
+    USERNAME:
+    PASSWORD:
+    FROM_ADDRESS:
+    TO_ADDRESS:
+    NAME_GROUP:
   LinkAlbom:
-    ALBOM_WITHOUT_UNION: 
-    ALBOM_WITH_UNION: 
+    ALBOM_WITHOUT_UNION:
+    ALBOM_WITH_UNION:
 ...
